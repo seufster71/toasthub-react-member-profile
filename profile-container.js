@@ -18,42 +18,82 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import * as appPrefActions from '../../core/common/apppref-actions';
+import * as profileActions from '../../member/profile/profile-actions';
 import fuLogger from '../../core/common/fu-logger';
 import ProfileView from '../../memberView/profile/profile-view';
+import ProfileModifyView from '../../memberView/profile/profile-modify-view';
+import BaseContainer from '../../core/container/base-container';
 
-class ProfileContainer extends Component {
+class ProfileContainer extends BaseContainer {
 	constructor(props) {
 		super(props);
-
 	}
 
 	componentDidMount() {
-		//this.props.actions.initMember();
+		this.props.actions.init();
 	}
 
+	getState = () => {
+		return this.props.session;
+	}
+	
+	getForm = () => {
+		return "MEMBER_PROFILE_FORM";
+	}
+	
+	onOption = (code,item) => {
+		fuLogger.log({level:'TRACE',loc:'ProfileContainer::onOption',msg:" code "+code});
+		if (this.onOptionBase(code,item)) {
+			return;
+		}
+	}
+	
 	render() {
 		fuLogger.log({level:'TRACE',loc:'ProfileContainer::render',msg:"Hi there"});
-		return (
+		if (this.props.session.selected != null) {
+			return (
+				<ProfileModifyView
+				itemState={this.props.session}
+				appPrefs={this.props.appPrefs}
+				onSave={this.onSave}
+				onCancel={this.onCancel}
+				inputChange={this.inputChange}
+				onBlur={this.onBlur}/>
+			);
+		} else if (this.props.member.item != null) {
+			return (
 				<ProfileView
-				
+				itemState={this.props.session}
+				appPrefs={this.props.appPrefs}
+				onListLimitChange={this.onListLimitChange}
+				onSearchChange={this.onSearchChange}
+				onSearchClick={this.onSearchClick}
+				onPaginationClick={this.onPaginationClick}
+				onOrderBy={this.onOrderBy}
+				closeModal={this.closeModal}
+				onOption={this.onOption}
+				inputChange={this.inputChange}
+				session={this.props.session}
 				/>
-		);
+			);
+		} else {
+			return (<div> Loading... </div>);
+		}
 	}
 }
 
 ProfileContainer.propTypes = {
 	appPrefs: PropTypes.object,
-	lang: PropTypes.string,
-	actions: PropTypes.object
+	actions: PropTypes.object,
+	session: PropTypes.object
 };
 
 function mapStateToProps(state, ownProps) {
-	return {lang:state.lang, appPrefs:state.appPrefs};
+	return {appPrefs:state.appPrefs, session:state.session};
 }
 
 function mapDispatchToProps(dispatch) {
-	return { actions:bindActionCreators(appPrefActions,dispatch) };
+	return { actions:bindActionCreators(profileActions,dispatch) };
 }
 
 export default connect(mapStateToProps,mapDispatchToProps)(ProfileContainer);
