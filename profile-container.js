@@ -30,7 +30,7 @@ class ProfileContainer extends BaseContainer {
 	}
 
 	componentDidMount() {
-		this.props.actions.init();
+		this.props.actions.init({lang:this.props.session.selected.lang});
 	}
 
 	getState = () => {

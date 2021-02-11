@@ -21,7 +21,7 @@ import actionUtils from '../../core/common/action-utils';
 
 
 // thunks
-export function init() {
+export function init({lang}) {
   return function(dispatch) {
     let requestParams = {};
     requestParams.action = "INIT_PROFILE";
@@ -29,6 +29,7 @@ export function init() {
     requestParams.prefFormKeys = new Array("MEMBER_PROFILE_FORM");
     requestParams.prefTextKeys = new Array("MEMBER_PROFILE_PAGE");
     requestParams.prefLabelKeys = new Array("MEMBER_PROFILE_PAGE");
+    requestParams.lang = lang;
     let params = {};
     params.requestParams = requestParams;
     params.URI = '/api/member/callService';
@@ -50,7 +51,7 @@ export function init() {
 export function saveItem({state}) {
 	return function(dispatch) {
 		let requestParams = {};
-	    requestParams.action = "SAVE";
+	    requestParams.action = "SAVE_PROFILE";
 	    requestParams.service = "MEMBER_SVC";
 	    requestParams.inputFields = state.inputFields;
 
@@ -61,7 +62,8 @@ export function saveItem({state}) {
 	    return callService(params).then( (responseJson) => {
 	    	if (responseJson != null && responseJson.protocalError == null){
 	    		if(responseJson != null && responseJson.status != null && responseJson.status == "SUCCESS"){  
-	    			dispatch(list({state,info:["Save Successful"]}));
+	    			dispatch({type:'MEMBER_PROFILE_UPDATE_SESSION'});
+	    			dispatch({type:'SHOW_STATUS',info:responseJson.infos});
 	    		} else if (responseJson != null && responseJson.status != null && responseJson.status == "ACTIONFAILED") {
 	    			dispatch({type:'SHOW_STATUS',error:responseJson.errors});
 	    		}
@@ -105,6 +107,15 @@ export function inputChange(field,value) {
 		 params.field = field;
 		 params.value = value;
 		 dispatch({ type:"MEMBER_PROFILE_INPUT_CHANGE",params});
+	 };
+}
+
+export function selectChange({field,value}) {
+	return function(dispatch) {
+		let params = {};
+		params.field = field;
+		params.value = value;
+		dispatch({ type:"MEMBER_PROFILE_INPUT_CHANGE",params});
 	 };
 }
 
