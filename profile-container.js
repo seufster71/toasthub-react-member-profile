@@ -14,86 +14,72 @@
  * limitations under the License.
  */
 'use-strict';
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import * as profileActions from '../../member/profile/profile-actions';
 import fuLogger from '../../core/common/fu-logger';
 import ProfileView from '../../memberView/profile/profile-view';
 import ProfileModifyView from '../../memberView/profile/profile-modify-view';
 import BaseContainer from '../../core/container/base-container';
 
-class ProfileContainer extends BaseContainer {
-	constructor(props) {
-		super(props);
-	}
+function ProfileContainer() {
+	const session = useSelector((state) => state.session);
+	const appMenus = useSelector((state) => state.appMenus);
+	const appPrefs = useSelector((state) => state.appPrefs);
+	const dispatch = useDispatch();
+	const location = useLocation();
+	const navigate = useNavigate();
+	
+	useEffect(() => {
+		dispatch(teamActions.init({lang:session.selected.lang}));
+	}, []);
 
-	componentDidMount() {
-		this.props.actions.init({lang:this.props.session.selected.lang});
-	}
-
-	getState = () => {
-		return this.props.session;
+	const getState = () => {
+		return session;
 	}
 	
-	getForm = () => {
+	const getForm = () => {
 		return "MEMBER_PROFILE_FORM";
 	}
 	
-	onOption = (code,item) => {
+	const onOption = (code,item) => {
 		fuLogger.log({level:'TRACE',loc:'ProfileContainer::onOption',msg:" code "+code});
-		if (this.onOptionBase(code,item)) {
+		if (BaseContainer.onOptionBase(code,item)) {
 			return;
 		}
 	}
 	
-	render() {
-		fuLogger.log({level:'TRACE',loc:'ProfileContainer::render',msg:"Hi there"});
-		if (this.props.session.selected != null) {
-			return (
-				<ProfileModifyView
-				itemState={this.props.session}
-				appPrefs={this.props.appPrefs}
-				onSave={this.onSave}
-				onCancel={this.onCancel}
-				inputChange={this.inputChange}
-				onBlur={this.onBlur}/>
-			);
-		} else if (this.props.member.item != null) {
-			return (
-				<ProfileView
-				itemState={this.props.session}
-				appPrefs={this.props.appPrefs}
-				onListLimitChange={this.onListLimitChange}
-				onSearchChange={this.onSearchChange}
-				onSearchClick={this.onSearchClick}
-				onPaginationClick={this.onPaginationClick}
-				onOrderBy={this.onOrderBy}
-				closeModal={this.closeModal}
-				onOption={this.onOption}
-				inputChange={this.inputChange}
-				session={this.props.session}
-				/>
-			);
-		} else {
-			return (<div> Loading... </div>);
-		}
+	fuLogger.log({level:'TRACE',loc:'ProfileContainer::render',msg:"Hi there"});
+	if (session.selected != null) {
+		return (
+			<ProfileModifyView
+			itemState={session}
+			appPrefs={appPrefs}
+			onSave={BaseContainer.onSave}
+			onCancel={BaseContainer.onCancel}
+			inputChange={BaseContainer.inputChange}
+			/>
+		);
+	} else if (member.item != null) {
+		return (
+			<ProfileView
+			itemState={session}
+			appPrefs={appPrefs}
+			onListLimitChange={BaseContainer.onListLimitChange}
+			onSearchChange={BaseContainer.onSearchChange}
+			onSearchClick={BaseContainer.onSearchClick}
+			onPaginationClick={BaseContainer.onPaginationClick}
+			onOrderBy={BaseContainer.onOrderBy}
+			closeModal={BaseContainer.closeModal}
+			onOption={onOption}
+			inputChange={BaseContainer.inputChange}
+			session={session}
+			/>
+		);
+	} else {
+		return (<div> Loading... </div>);
 	}
 }
 
-ProfileContainer.propTypes = {
-	appPrefs: PropTypes.object,
-	actions: PropTypes.object,
-	session: PropTypes.object
-};
-
-function mapStateToProps(state, ownProps) {
-	return {appPrefs:state.appPrefs, session:state.session};
-}
-
-function mapDispatchToProps(dispatch) {
-	return { actions:bindActionCreators(profileActions,dispatch) };
-}
-
-export default connect(mapStateToProps,mapDispatchToProps)(ProfileContainer);
+export default ProfileContainer;
