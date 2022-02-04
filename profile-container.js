@@ -16,14 +16,15 @@
 'use-strict';
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import * as profileActions from '../../member/profile/profile-actions';
+import { useNavigate, useLocation } from "react-router-dom";
+import * as actions from '../../member/profile/profile-actions';
 import fuLogger from '../../core/common/fu-logger';
 import ProfileView from '../../memberView/profile/profile-view';
 import ProfileModifyView from '../../memberView/profile/profile-modify-view';
 import BaseContainer from '../../core/container/base-container';
 
 function ProfileContainer() {
+	const itemState = useSelector((state) => state.member);
 	const session = useSelector((state) => state.session);
 	const appMenus = useSelector((state) => state.appMenus);
 	const appPrefs = useSelector((state) => state.appPrefs);
@@ -32,49 +33,54 @@ function ProfileContainer() {
 	const navigate = useNavigate();
 	
 	useEffect(() => {
-		dispatch(teamActions.init({lang:session.selected.lang}));
+		dispatch(actions.init({lang:session.selected.lang}));
 	}, []);
 
-	const getState = () => {
-		return session;
+	const onListLimitChange = (fieldName,event) => {
+		BaseContainer.onListLimitChange({state:itemState,actions:actions,dispatch:dispatch,appPrefs:appPrefs,fieldName,event});
+	}
+	const onPaginationClick = (value) => {
+		BaseContainer.onPaginationClick({state:itemState,actions:actions,dispatch:dispatch,value});
+	}
+	const onSearchChange = (field,event) => {
+		BaseContainer.onSearchChange({state:itemState,actions:actions,dispatch:dispatch,appPrefs:appPrefs,field,event});
+	}
+	const onSearchClick = (field,event) => {
+		BaseContainer.onSearchClick({state:itemState,actions:actions,dispatch:dispatch,field,event});
+	}
+	const inputChange = (type,field,value,event) => {
+		BaseContainer.inputChange({state:itemState,actions:actions,dispatch:dispatch,appPrefs:appPrefs,type,field,value,event});
+	}
+	const onOrderBy = (event) => {
+		BaseContainer.onOrderBy({state:itemState,actions:actions,dispatch:dispatch,appPrefs:appPrefs,event});
+	}
+	const onSave = () => {
+		BaseContainer.onSave({state:itemState,actions:actions,dispatch:dispatch,appPrefs:appPrefs,form:"MEMBER_PROFILE_FORM"});
+	}
+	const closeModal = () => {
+		BaseContainer.closeModal({actions:actions,dispatch:dispatch});
+	}
+	const onCancel = () => {
+		BaseContainer.onCancel({state:itemState,actions:actions,dispatch:dispatch});
 	}
 	
-	const getForm = () => {
-		return "MEMBER_PROFILE_FORM";
-	}
 	
 	const onOption = (code,item) => {
 		fuLogger.log({level:'TRACE',loc:'ProfileContainer::onOption',msg:" code "+code});
-		if (BaseContainer.onOptionBase(code,item)) {
+		if (BaseContainer.onOptionBase({state:itemState,actions:actions,dispatch:dispatch,code:code,appPrefs:appPrefs,item:item})) {
 			return;
 		}
 	}
 	
 	fuLogger.log({level:'TRACE',loc:'ProfileContainer::render',msg:"Hi there"});
-	if (session.selected != null) {
+	if (itemState.item != null) {
 		return (
 			<ProfileModifyView
-			itemState={session}
+			itemState={itemState}
 			appPrefs={appPrefs}
-			onSave={BaseContainer.onSave}
-			onCancel={BaseContainer.onCancel}
-			inputChange={BaseContainer.inputChange}
-			/>
-		);
-	} else if (member.item != null) {
-		return (
-			<ProfileView
-			itemState={session}
-			appPrefs={appPrefs}
-			onListLimitChange={BaseContainer.onListLimitChange}
-			onSearchChange={BaseContainer.onSearchChange}
-			onSearchClick={BaseContainer.onSearchClick}
-			onPaginationClick={BaseContainer.onPaginationClick}
-			onOrderBy={BaseContainer.onOrderBy}
-			closeModal={BaseContainer.closeModal}
-			onOption={onOption}
-			inputChange={BaseContainer.inputChange}
-			session={session}
+			onSave={onSave}
+			onCancel={onCancel}
+			inputChange={inputChange}
 			/>
 		);
 	} else {

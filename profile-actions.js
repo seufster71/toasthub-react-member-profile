@@ -62,7 +62,7 @@ export function saveItem({state}) {
 	    return callService(params).then( (responseJson) => {
 	    	if (responseJson != null && responseJson.protocalError == null){
 	    		if(responseJson != null && responseJson.status != null && responseJson.status == "SUCCESS"){  
-	    			dispatch({type:'MEMBER_PROFILE_UPDATE_SESSION'});
+	    			dispatch({type:'MEMBER_PROFILE_UPDATE',memberState:state});
 	    			dispatch({type:'SHOW_STATUS',info:responseJson.infos});
 	    		} else if (responseJson != null && responseJson.status != null && responseJson.status == "ACTIONFAILED") {
 	    			dispatch({type:'SHOW_STATUS',error:responseJson.errors});
