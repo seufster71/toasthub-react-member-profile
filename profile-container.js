@@ -16,7 +16,6 @@
 'use-strict';
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, useLocation } from "react-router-dom";
 import * as actions from '../../member/profile/profile-actions';
 import fuLogger from '../../core/common/fu-logger';
 import ProfileView from '../../memberView/profile/profile-view';
@@ -29,8 +28,6 @@ function ProfileContainer() {
 	const appMenus = useSelector((state) => state.appMenus);
 	const appPrefs = useSelector((state) => state.appPrefs);
 	const dispatch = useDispatch();
-	const location = useLocation();
-	const navigate = useNavigate();
 	
 	useEffect(() => {
 		dispatch(actions.init({lang:session.selected.lang}));
